@@ -1,56 +1,56 @@
-const EventEmitter = require('eventemitter3')
-const restify = require('restify')
+const EventEmitter = require("eventemitter3");
+const restify = require("restify");
 
-const packageJson = require('./package.json')
+const packageJson = require("./package.json");
 
 class HttpServer extends EventEmitter {
   constructor(device) {
-    super()
+    super();
 
-    this.device = device
-    this.server = null
+    this.device = device;
+    this.server = null;
   }
 
-  start() {
+  start(ip) {
     if (this.server !== null) {
-      return Promise.resolve()
+      return Promise.resolve();
     }
 
     return new Promise((resolve, reject) => {
-      const server = this.server = restify.createServer({
-        name: 'Fake Shelly',
+      const server = (this.server = restify.createServer({
+        name: "Fake Shelly",
         version: packageJson.version,
-      })
+      }));
 
-      server.use(restify.plugins.queryParser())
-      server.on('pre', req => {
-        console.log(req.method, req.url)
-      })
+      server.use(restify.plugins.queryParser());
+      server.on("pre", (req) => {
+        console.log(req.method, req.url);
+      });
 
-      this.device.setupHttpRoutes(server)
+      this.device.setupHttpRoutes(server);
 
-      server.listen(80, error => {
+      server.listen(80, ip, (error) => {
         if (!error) {
-          resolve()
+          resolve();
         } else {
-          reject(error)
+          reject(error);
         }
-      })
-    })
+      });
+    });
   }
 
   stop() {
     if (this.server === null) {
-      return Promise.resolve()
+      return Promise.resolve();
     }
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.server.close(() => {
-        this.server = null
-        resolve()
-      })
-    })
+        this.server = null;
+        resolve();
+      });
+    });
   }
 }
 
-module.exports = HttpServer
+module.exports = HttpServer;
